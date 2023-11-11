@@ -3,7 +3,7 @@ import threading
 
 # Connection Data
 host = '127.0.0.1'
-port = 54555
+port = 57555
 
 # Starting Server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,19 +15,35 @@ clients = []
 nicknames = []
 
 
-def broadcast(message):
-    for client in clients:
-        print(client)
-        client.send(message)
+def message_handler(text):
+    text_str = str(text)
+    back_text = str(text).replace("%-=-%", ':').encode('utf-8')
+    if text_str.count("%-=-%") > 0:
+        user = text_str.split('%-=-%')[0]
+        message = text_str.split('%-=-%')[1]
+        message_reader = message.split(" ")
+        try:
+            for index in range(len(nicknames)):
+                if nicknames[index] == message_reader[0]:
+                    print(True)
+                    return nicknames[index], str(user + "(private): " + message.replace(nicknames[index], "")).encode(
+                        'utf-8')
+        except:
+            return "all", back_text
+    return "all", back_text
 
-    for name in range(len()):
-        print(name, )
 
+def broadcast(message1):
+    name, message = message_handler(message1)
+    print(name, message)
+    if name == "all":
+        for client in clients:
+            client.send(message)
+    else:
+        for index in range(len(nicknames)):
+            if nicknames[index] == name:
+                clients[index].send(message)
 
-def broadcast_only_one(message):
-    for client in clients:
-        print(client)
-        client.send(message)
 
 # Name  -> port
 def handle(client):
